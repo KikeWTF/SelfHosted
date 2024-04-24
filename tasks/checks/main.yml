@@ -1,0 +1,9 @@
+---
+- name: Ensure that the variables are correctly set
+  ansible.builtin.include_tasks: variables.yml
+
+- name: Ensure that the 'python' dependencies are installed
+  ansible.builtin.include_tasks: python.yml
+
+- name: Ensure that the 'docker' service is installed and running
+  ansible.builtin.include_tasks: docker.yml

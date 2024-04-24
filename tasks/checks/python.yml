@@ -1,0 +1,9 @@
+---
+- name: Install Python dependencies
+  ansible.builtin.package:
+    name: "{{ 'py3' if ansible_distribution|lower == 'alpine' else 'python3'  }}-{{ package }}"
+    state: present
+  loop_control: { loop_var: package }
+  loop:
+    - requests
+    - cryptography

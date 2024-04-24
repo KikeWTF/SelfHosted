@@ -1,0 +1,13 @@
+---
+# ================================
+#       Server Configuration
+# ================================
+
+# The result state of each service. Options are [running, present, stopped, absent].
+state: running
+
+# The server domain(s).
+domains: []
+
+# The managed services. At least one service is required.
+services: []

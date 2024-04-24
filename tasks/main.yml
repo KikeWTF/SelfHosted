@@ -1,0 +1,4 @@
+---
+- name: Launch all the checks
+  ansible.builtin.include_tasks: checks/main.yml
+

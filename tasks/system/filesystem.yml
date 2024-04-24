@@ -1,6 +1,0 @@
----
-- name: Create the filesystem folders
-  ansible.builtin.file: state=directory path="{{ item }}" mode=0700
-  loop:
-    - "{{ srv_root }}"
-    - "{{ srv_data }}"
