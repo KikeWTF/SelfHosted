@@ -1,0 +1,75 @@
+---
+- name: Check if the 'database' network exists
+  community.docker.docker_network_info: name=database
+  register: docker_network_database
+
+- name: A database service is required for the Adminer service
+  ansible.builtin.fail: msg="No database service running but required for the Adminer service."
+  when: not docker_network_database.exists|bool
+
+- name: Create the Adminer configuration folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/adminer" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Check if the 'proxy' network exists
+  community.docker.docker_network_info: name=proxy
+  register: docker_network_proxy
+
+- name: Create the Adminer compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/adminer/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+
+      networks:
+        database: { external: true }
+      {% if docker_network_proxy.exists|bool %}
+        proxy: { external: true }
+      {% endif %}
+
+      services:
+        adminer:
+          <<: *defaults
+          container_name: adminer
+          hostname: adminer
+          image: adminer:latest
+          networks:
+            - database
+      {% if docker_network_proxy.exists|bool %}
+            - proxy
+      {% else %}
+          ports: ["{{ adminer_port }}:8080/tcp"]
+      {% endif %}
+          security_opt: [no-new-privileges]
+          healthcheck:
+            test: /usr/bin/timeout 10s /bin/ps x | /bin/grep -q php
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          environment:
+            ADMINER_DESIGN: {{ adminer_theme }}
+          entrypoint: |
+            /usr/local/bin/entrypoint.sh /usr/bin/php -S [::]:8080 -t /var/www/html
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+            homepage.name: Adminer
+            homepage.group: Management
+            homepage.description: Database management
+            homepage.icon: /icons/adminer.png
+            homepage.href: https://{{ adminer_domain }}{{ adminer_path }}/
+      {% if docker_network_proxy.exists|bool %}
+            traefik.enable: true
+            traefik.http.routers.adminer.rule: Host(`{{ adminer_domain }}`) && PathPrefix(`{{ adminer_path }}/`)
+            traefik.http.routers.adminer.entrypoints: https
+            traefik.http.routers.adminer.service: adminer
+            traefik.http.routers.adminer.middlewares: adminer@docker,internal@file
+            traefik.http.services.adminer.loadbalancer.server.port: 8080
+            traefik.http.middlewares.adminer.stripprefix.prefixes: "{{ adminer_path }}"
+      {% endif %}
+
+- name: Deploy Adminer service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/adminer" remove_orphans=true

@@ -1,0 +1,39 @@
+---
+- name: Create the WatchTower folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/watchtower" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Create the WatchTower compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/watchtower/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+
+      services:
+        watchtower:
+          <<: *defaults
+          container_name: watchtower
+          hostname: watchtower
+          image: containrrr/watchtower:latest
+          security_opt: [no-new-privileges]
+          healthcheck:
+            test: [ CMD, "/watchtower", "--health-check" ]
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:rw
+          command: --cleanup --label-enable --remove-volumes --schedule '{{ watchtower_schedule }}'
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+            homepage.name: WatchTower
+            homepage.group: Services
+            homepage.description: Automatic Docker updates
+            homepage.icon: /icons/watchtower.png
+
+- name: Deploy WatchTower service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/watchtower" remove_orphans=true

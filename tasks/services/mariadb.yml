@@ -1,0 +1,53 @@
+---
+- name: Create the MariaDB configuration folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/mariadb" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Check if the 'database' network exists
+  community.docker.docker_network_info: name=database
+  register: docker_network_database
+
+- name: Create the 'database' network
+  community.docker.docker_network: name=database state=present driver=bridge ipam_driver=default ipam_config="[{\"subnet\":\"{{ compose_networks.database }}\"}]"
+  when: not docker_network_database.exists|bool
+
+- name: Create the MariaDB compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/mariadb/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+
+      networks:
+        database: { external: true }
+
+      services:
+        mariadb:
+          <<: *defaults
+          container_name: mariadb
+          hostname: mariadb
+          image: mariadb:latest
+          networks:
+            - database
+          security_opt: [no-new-privileges]
+          healthcheck:
+            test: /usr/bin/timeout 10s /usr/local/bin/healthcheck.sh --connect
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          volumes:
+            - {{ srv_data }}/mariadb:/var/lib/mysql:rw
+          environment:
+            MARIADB_ROOT_PASSWORD: '{{ mariadb_admin_pass }}'
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+            homepage.name: MariaDB
+            homepage.group: Services
+            homepage.description: MySQL database server
+            homepage.icon: /icons/mariadb.png
+
+- name: Deploy MariaDB service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/mariadb" remove_orphans=true

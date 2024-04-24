@@ -1,0 +1,13 @@
+---
+- name: Install Python dependencies
+  when: ansible_distribution|lower != 'alpine'
+  ansible.builtin.package: name=python3-{{ item }} state=present
+  loop:
+    - cryptography
+
+- name: Install Python dependencies on Alpine
+  when: ansible_distribution|lower == 'alpine'
+  ansible.builtin.package: name=py3-{{ item }} state=present
+  loop:
+    - requests
+    - cryptography

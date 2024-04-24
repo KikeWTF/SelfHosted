@@ -1,0 +1,139 @@
+---
+- name: Create the Homepage configuration folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/homepage/config" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Check if the 'proxy' network exists
+  community.docker.docker_network_info: name=proxy
+  register: docker_network_proxy
+
+- name: Create the Homepage compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/homepage/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+      {% if docker_network_proxy.exists|bool %}
+        
+      networks:
+        proxy: { external: true }
+      {% endif %}
+
+      services:
+        homepage:
+          <<: *defaults
+          container_name: homepage
+          hostname: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+      {% if docker_network_proxy.exists|bool %}
+          networks:
+            - proxy
+      {% else %}
+          ports: ["{{ homepage_port }}:3000/tcp"]
+      {% endif %}
+          security_opt: [no-new-privileges]
+          healthcheck:
+            test: /usr/bin/timeout 10s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:3000/api/healthcheck || exit 1'
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          volumes:
+            - ./config:/app/config:ro
+            - ./icons:/app/public/icons:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+      {% if docker_network_proxy.exists|bool %}
+            traefik.enable: true
+            traefik.http.routers.homepage.rule: Host(`{{ homepage_domain }}`)
+            traefik.http.routers.homepage.entrypoints: https
+            traefik.http.routers.homepage.service: homepage
+            traefik.http.routers.homepage.middlewares: internal@file
+            traefik.http.services.homepage.loadbalancer.server.port: 3000
+      {% endif %}
+
+- name: Copy all the icons
+  ansible.builtin.copy: src=../files/icons/ dest="{{ srv_root }}/homepage/icons" mode="0400" force=yes
+
+- name: Create the Homepage configuration file
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/homepage/config/settings.yaml"
+    mode: "0400"
+    content: |
+      ---
+      {% if docker_network_proxy.exists|bool %}
+      base: https://{{ homepage_domain }}
+      {% endif %}
+      title: "{{ srv_org }} Homepage"
+      theme: {{ homepage_theme }}
+      color: {{ homepage_color }}
+      layout:
+        Management:
+          style: row
+          columns: 4
+        Services:
+          style: row
+          columns: 4
+      useEqualHeights: true
+      headerStyle: {{ homepage_header }}
+      language: en
+      target: _blank
+      quicklaunch:
+        searchDescriptions: true
+        hideInternetSearch: true
+        showSearchSuggestions: false
+        hideVisitURL: true
+      hideVersion: true
+      logpath: homepage.log
+      showStats: false
+      statusStyle: "dot"
+
+- name: Create the Homepage Docker configuration file
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/homepage/config/docker.yaml"
+    mode: "0400"
+    content: |
+      ---
+      local:
+        socket: /var/run/docker.sock
+
+- name: Create the Homepage widgets configuration files
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/homepage/config/widgets.yaml"
+    mode: "0400"
+    content: |
+      ---
+      - resources:
+        cputemp: true
+        cpu: true
+        memory: true
+        disk: /
+        uptime: true
+        refresh: 3000
+      
+      - datetime:
+        text_size: xl
+        format:
+          dateStyle: short
+          timeStyle: short
+          hour12: true
+
+- name: Create the Homepage unused configuration files
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/homepage/config/{{ config }}"
+    mode: "0400"
+    content: ''
+  loop_control:
+    loop_var: config
+  loop:
+    - custom.css
+    - custom.js
+    - bookmarks.yaml
+    - kubernetes.yaml
+    - services.yaml
+
+- name: Deploy Homepage service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/homepage" remove_orphans=true

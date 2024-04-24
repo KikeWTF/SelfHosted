@@ -1,0 +1,224 @@
+---
+- name: Create the Traefik configuration folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/traefik/config/dynamic" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Create the Traefik compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/traefik/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+
+      networks:
+        proxy: { name: proxy, driver: bridge, ipam: { config: [ { subnet: "{{ compose_networks.proxy }}" } ] } }
+
+      services:
+        traefik:
+          <<: *defaults
+          container_name: traefik
+          hostname: traefik
+          image: traefik:latest
+          networks: [proxy]
+          security_opt: [no-new-privileges]
+          healthcheck:
+            test: /usr/bin/timeout 10s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:9999/ping'
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          ports: ["22:22/tcp","443:443/tcp","8080:8080/tcp"]
+          volumes:
+            - {{ srv_data }}/traefik:/certificates:rw
+            - ./config:/etc/traefik:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+      {% if traefik_internal|bool %}
+          environment:
+      {% if traefik_provider == "cloudflare" %}
+            CF_DNS_API_TOKEN: '{{ token_cloudflare }}'
+      {% endif %}
+      {% endif %}
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+
+- name: Create the Traefik static configuration
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/traefik/config/traefik.yml"
+    mode: "0400"
+    content: |
+      ---
+      global:
+        checkNewVersion: false
+        sendAnonymousUsage: false
+      entryPoints:
+        ssh:
+          address: ':22/tcp'
+        https:
+          address: ':443/tcp'
+          http:
+            middlewares:
+              - compression@file
+              - errors@file
+              - jokes@file
+              - security@file
+            tls:
+              options: default
+              certResolver: challenge
+              domains:
+                - main: '{{ srv_domain }}'
+                  sans:
+                    - '*.{{ srv_domain }}'
+          http2:
+            maxConcurrentStreams: 250
+        healthcheck:
+          address: '127.0.0.1:9999/tcp'
+      providers:
+        providersThrottleDuration: 2s
+        docker:
+          watch: true
+          endpoint: "unix:///var/run/docker.sock"
+          exposedByDefault: false
+          useBindPortIP: false
+          network: proxy
+          allowEmptyServices: false
+        file:
+          directory: /etc/traefik/dynamic
+          watch: true
+      # TODO: Secure the API with custom routers and middlewares
+      api:
+        insecure: true
+        dashboard: true
+        disableDashboardAd: true
+      # TODO: Metrics (Prometheus)
+      ping:
+        entryPoint: healthcheck
+      log:
+        level: debug
+      accessLog:
+        filters:
+          statusCodes:
+            - 200
+      certificatesResolvers:
+        challenge:
+          acme:
+      {% if email_administrator|length > 0 %}
+            email: {{ email_administrator }} 
+      {% endif %}
+            caServer: "https://acme-{{ 'staging-' if traefik_dev|bool else '' }}v02.api.letsencrypt.org/directory"
+            storage: /certificates/acme.json
+      {% if traefik_internal|bool %}
+            dnsChallenge:
+              provider: {{ traefik_provider }}
+              delayBeforeCheck: 10s
+              resolvers:
+                - "1.1.1.1:53"
+                - "8.8.8.8:53"
+              disablePropagationCheck: false
+      {% else %}
+            tlsChallenge: {}
+      {% endif %}
+
+- name: Create the Traefik dynamic TLS configuration
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/traefik/config/dynamic/tls.yml"
+    mode: "0400"
+    content: |
+      ---
+      tls:
+        options:
+          default:
+            minVersion: VersionTLS12
+            sniStrict: true
+            cipherSuites:
+              - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+              - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+              - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+              - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+              - TLS_FALLBACK_SCSV # RFC 7507
+            curvePreferences:
+              - secp521r1
+              - secp384r1
+
+- name: Create the Traefik dynamic middleware configuration
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/traefik/config/dynamic/middlewares.yml"
+    mode: "0400"
+    content: |
+      ---
+      http:
+        middlewares:
+          compression:
+            compress:
+              minResponseBodyBytes: 1024
+              excludedContentTypes:
+                - text/event-stream
+
+          errors:
+            errors:
+              status:
+                - 400-599
+              service: errorpages@docker
+              query: /{status}.html
+
+          jokes:
+            headers:
+              customResponseHeaders:
+                Server: Nokia 3310
+                X-Clacks-Overhead: GNU Kike Fontan
+                X-mas: Ho ho ho!
+                X-Men: Wolverine and Deadpool
+                X-NaNaNaNaNaNaNaNa: Batman!
+                X-PoweredBy: Pumas, unicorns and rainbows
+                X-Rays: Mr. Rontgen
+
+          hsts:
+            headers:
+              forceSTSHeader: true
+              stsPreload: true
+              stsSeconds: 315360000
+              stsIncludeSubdomains: true
+
+          https-only:
+            chain:
+              middlewares:
+                - https-redirect@file
+                - hsts@file
+
+          https-redirect:
+            redirectScheme:
+              port: 443
+              scheme: https
+              permanent: true
+          
+          security:
+            chain:
+              middlewares:
+                - security-headers@file
+                - https-only@file
+
+          security-headers:
+            headers:
+              contentTypeNosniff: true      # Prevents browsers from trying to guess a MIME type
+              browserXssFilter: true        # Prevents reflected XSS attacks
+              contentSecurityPolicy: |      # Defines the Content Security Policy
+                default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; base-uri 'self';
+              referrerPolicy: no-referrer   # Hide the Referer header
+              isDevelopment: false          # Always act as if the app is in production
+              customResponseHeaders:
+                X-Frame-Options: SAMEORIGIN # Prevents clickjacking attacks
+                X-Robots-Tag: |             # Prevents search engines from indexing the site
+                  noindex, nofollow, nosnippet, noarchive, notranslate, noimageindex, nositelinkssearchbox
+          
+          internal:
+            ipAllowList:
+              sourceRange:
+                - "10.0.0.0/8"
+                - "127.0.0.1/32"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+                - "fc00::/7"
+
+- name: Deploy Traefik service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/traefik" remove_orphans=true

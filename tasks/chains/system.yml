@@ -1,0 +1,9 @@
+---
+- name: Prepare the system
+  ansible.builtin.include_tasks: ../tasks/system/{{ system_task }}.yml
+  loop_control: { loop_var: system_task }
+  loop:
+    - update
+    - python
+    - docker
+    - filesystem

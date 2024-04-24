@@ -1,0 +1,74 @@
+---
+- name: Check if the 'ldap' network exists
+  community.docker.docker_network_info: name=ldap
+  register: docker_network_ldap
+
+- name: An LDAP service is required for the phpLDAPadmin service
+  ansible.builtin.fail: msg="No LDAP service running but required for the phpLDAPadmin service."
+  when: not docker_network_ldap.exists|bool
+
+- name: Create the phpLDAPadmin folder
+  ansible.builtin.file: state=directory path="{{ srv_root }}/phpldapadmin" mode=0700 access_time=preserve modification_time=preserve
+
+- name: Check if the 'proxy' network exists
+  community.docker.docker_network_info: name=proxy
+  register: docker_network_proxy
+
+- name: Create the phpLDAPadmin compose file
+  changed_when: false
+  ansible.builtin.copy:
+    dest: "{{ srv_root }}/phpldapadmin/docker-compose.yml"
+    mode: "0400"
+    content: |
+      ---
+      x-defaults: &defaults
+        {{ compose_defaults|to_yaml|trim|indent(2) }}
+      
+      networks:
+        ldap: { external: true }
+      {% if docker_network_proxy.exists|bool %}
+        proxy: { external: true }
+      {% endif %}
+
+      services:
+        phpldapadmin:
+          container_name: phpldapadmin
+          hostname: phpldapadmin
+          image: osixia/phpldapadmin:latest
+          networks:
+            - ldap
+      {% if docker_network_proxy.exists|bool %}
+            - proxy
+      {% else %}
+          ports: ["{{ phpldapadmin_port }}:80/tcp"]
+      {% endif %}
+          healthcheck:
+            test: /usr/bin/timeout 10s /bin/sh -c '/bin/cat /run/apache2/apache2.pid || exit 1'
+            start_period: 5s
+            interval: 60s
+            timeout: 10s
+            retries: 3
+          environment:
+            PHPLDAPADMIN_LDAP_HOSTS: openldap
+            PHPLDAPADMIN_HTTPS: 'false'
+      {% if docker_network_proxy.exists|bool %}
+            PHPLDAPADMIN_SERVER_PATH: {{ phpldapadmin_path }}
+      {% endif %}
+          labels:
+            com.centurylinklabs.watchtower.enable: true
+            homepage.name: phpLDAPadmin
+            homepage.group: Management
+            homepage.description: LDAP management
+            homepage.icon: /icons/phpldapadmin.png
+            homepage.href: https://{{ phpldapadmin_domain }}{{ phpldapadmin_path }}/
+      {% if docker_network_proxy.exists|bool %}
+            traefik.enable: true
+            traefik.http.routers.phpldapadmin.rule: 'Host(`{{ phpldapadmin_domain }}`) && PathPrefix(`{{ phpldapadmin_path }}/`)'
+            traefik.http.routers.phpldapadmin.entrypoints: https
+            traefik.http.routers.phpldapadmin.service: phpldapadmin
+            traefik.http.routers.phpldapadmin.middlewares: internal@file
+            traefik.http.services.phpldapadmin.loadbalancer.server.port: 80
+      {% endif %}
+
+- name: Deploy phpLDAPadmin service
+  community.docker.docker_compose_v2: project_src="{{ srv_root }}/phpldapadmin" remove_orphans=true
