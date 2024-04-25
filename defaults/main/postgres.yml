@@ -1,0 +1,13 @@
+---
+# ================================
+#     PostgreSQL Configuration
+# ================================
+# PostgreSQL is a powerful, open-source object-relational database system.
+# Website: https://www.postgresql.org/
+
+# The PostgreSQL admin user.
+postgres_admin_user: 'admin'
+
+# The PostgreSQL admin password.
+postgres_admin_pass: ''
+...

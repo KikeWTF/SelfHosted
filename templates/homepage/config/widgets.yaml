@@ -1,0 +1,15 @@
+---
+- resources:
+    cpu: true
+    cputemp: true
+    memory: true
+    disk: '/'
+    uptime: true
+
+- datetime:
+    text_size: 'xl'
+    format:
+      dateStyle: 'short'
+      timeStyle: 'short'
+      hour12: true
+...

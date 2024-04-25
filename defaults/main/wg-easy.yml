@@ -1,0 +1,25 @@
+---
+# ================================
+#      WG-Easy Configuration
+# ================================
+# WG-Easy is a WireGuard VPN server and manager.
+# Website: https://github.com/wg-easy/wg-easy
+
+# The WG-Easy admin password.
+wg_easy_admin_pass: ''
+
+# The WG-Easy subnet (using x for available octets)
+wg_easy_subnet: '10.0.0.x'
+
+# The WG-Easy DNS server.
+wg_easy_dns: "{{ ansible_default_ipv4['address'] }},1.1.1.1,8.8.8.8"
+
+# The WG-Easy allowed IPs.
+wg_easy_allowed_ips: '1.1.1.1,8.8.8.8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7'
+
+# The WG-Easy domain (public network required).
+wg_easy_domain: ''
+
+# The WG-Easy path (avoid the trailing slash).
+wg_easy_path: '/wg_easy'
+...

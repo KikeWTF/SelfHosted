@@ -1,36 +1,42 @@
 ---
-- name: Remove the service directory
-  ansible.builtin.file:
-    path: "{{ path_services }}/{{ service }}"
-    state: absent
-  when: state == 'absent'
+- name: 'Print the service name'
+  ansible.builtin.debug:
+    msg: "Current service: {{ service }}"
 
-- name: Ensure that the service directory exists
+- name: 'Remove the service directory if exists'
   ansible.builtin.file:
     path: "{{ path_services }}/{{ service }}"
-    state: directory
+    state: 'absent'
+  when: "state == 'absent'"
+
+- name: 'Ensure that the service directory exists'
+  ansible.builtin.file:
+    path: "{{ path_services }}/{{ service }}"
+    state: 'directory'
     mode: '0700'
-    access_time: preserve
-    modification_time: preserve
-  when: state != 'absent'
+    access_time: 'preserve'
+    modification_time: 'preserve'
+  when: "state != 'absent'"
 
-- name: Ensure that the configuration is available
+- name: 'Ensure that the configuration is available'
   ansible.builtin.import_tasks: "{{ service }}.yml"
+  when: "state != 'absent'"
 
-- name: Create the compose file
+- name: 'Create the compose file'
   ansible.builtin.template:
     src: "{{ service }}/compose.yml.j2"
     dest: "{{ path_services }}/{{ service }}/compose.yml"
     mode: '0600'
-  when: state != 'absent'
+  when: "state != 'absent'"
 
-- name: Manage the service
+- name: 'Manage the service'
   community.docker.docker_compose_v2:
     project_src: "{{ path_services }}/{{ service }}"
     state: "{{ state }}"
-    build: policy
-    pull: policy
-    recreate: always
-    remove_images: all
+    build: 'policy'
+    pull: 'policy'
+    recreate: 'always'
+    remove_images: 'all'
     remove_orphans: true
     remove_volumes: true
+...

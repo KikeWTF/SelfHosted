@@ -1,0 +1,11 @@
+---
+- name: "Check if the 'database' network exists"
+  community.docker.docker_network_info:
+    name: 'database'
+  register: 'docker_network_database'
+
+- name: 'Check that the Postgres admin password is defined'
+  ansible.builtin.fail:
+    msg: "The Postgres admin password (postgres_admin_pass) is required."
+  when: 'postgres_admin_pass|trim|length == 0'
+...

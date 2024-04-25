@@ -1,0 +1,21 @@
+---
+- name: 'Check that the WG-Easy domain is defined'
+  ansible.builtin.fail:
+    msg: "The WG-Easy domain (wg_easy_domain) is required."
+  when: 'wg_easy_domain|trim|length == 0'
+
+- name: 'Check that the WG-Easy admin password is defined'
+  ansible.builtin.fail:
+    msg: "The WG-Easy admin password (wg_easy_admin_pass) is required."
+  when: 'wg_easy_admin_pass|trim|length == 0'
+
+- name: "Check that the 'public' newtork exists"
+  community.docker.docker_network_info:
+    name: 'public'
+  register: 'docker_network_public'
+
+- name: "Ensure that the 'public' network exists"
+  ansible.builtin.fail:
+    msg: "The 'public' network does not exist. This usually means that the 'traefik' service is not running."
+  when: 'not docker_network_public.exists'
+...

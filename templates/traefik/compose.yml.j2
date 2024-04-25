@@ -29,6 +29,7 @@ services:
     ports:
       - 22:22/tcp
       - 443:443/tcp
+      - 51820:51820/udp
 {% if traefik_dashboard|bool %}
       - 8080:8080/tcp
 {% endif %}
@@ -46,6 +47,8 @@ services:
       com.centurylinklabs.watchtower.enable: true
       homepage.name: Traefik
       homepage.group: Services
-      homepage.description: Reverse Proxy
+      homepage.description: Reverse proxy
       homepage.icon: /icons/traefik.png
-      # TODO: Add Traefik widget ?
+      # TODO: Add widget
+      #homepage.widget.type: traefik
+      #homepage.widget.url:

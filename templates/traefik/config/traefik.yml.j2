@@ -30,6 +30,8 @@ entryPoints:
       advertisedPort: 443
   healthcheck:
     address: '127.0.0.1:9999/tcp'
+  wireguard:
+    address: ':51820/udp'
 providers:
   providersThrottleDuration: 2s
   docker:

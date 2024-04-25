@@ -1,0 +1,46 @@
+---
+networks:
+  database:
+{% if docker_network_database.exists %}
+    external: true
+{% else %}
+    name: database
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "{{ networks['database']|default('172.16.0.0./24') }}"
+{% endif %}
+
+services:
+  postgres:
+    container_name: postgres
+    hostname: postgres
+    image: postgres:alpine
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: 1
+        max-size: 10m
+    networks:
+      - database
+    healthcheck:
+      test: /usr/bin/timeout 5s /usr/local/bin/pg_isready -d postgres
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    volumes:
+      - "{{ path_data }}/postgres:/var/lib/postgresql/data:rw"
+    environment:
+      PGUSER: "{{ postgres_admin_user }}"
+      POSTGRES_USER: "{{ postgres_admin_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_admin_pass }}"
+      POSTGRES_DB: postgres
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.name: PostgreSQL
+      homepage.group: Services
+      homepage.description: PostgreSQL database
+      homepage.icon: /icons/postgres.png

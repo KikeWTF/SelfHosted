@@ -9,9 +9,10 @@
 errorpages_details: true
 
 # The ErrorPages theme (ghost, l7-light, l7-dark, shuffle, noise, hacker-terminal, cats, lost-in-space, app-down, connection, matrix, orient)
-errorpages_theme: l7-dark
+errorpages_theme: 'l7-dark'
 
 # --- | If the proxy is running
 
 # The ErrorPages port
 errorpages_port: 8080
+...

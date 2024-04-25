@@ -4,7 +4,7 @@
 # ================================
 
 # The result state of each service. Options are [present, stopped, absent].
-state: present
+state: 'present'
 
 # The server domain(s).
 domains: []
@@ -12,14 +12,18 @@ domains: []
 # The email address of the administrator.
 email_administrator: "admin@{{ domains[0] if domains|length > 0 else 'localhost' }}"
 
-# The managed services. At least one service is required.
-services: []
+# The default language of the server.
+language: 'en'
 
 # The path to the data directory.
-path_data: /mnt/data
+path_data: '/mnt/data'
 
 # The path to the services directory.
-path_services: /mnt/services
+path_services: '/mnt/services'
 
 # The timezone of the server.
-timezone: Europe/Madrid
+timezone: 'Europe/Madrid'
+
+# The managed services. At least one service is required.
+services: []
+...

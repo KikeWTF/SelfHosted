@@ -1,0 +1,31 @@
+---
+# ================================
+#     HomePage Configuration
+# ================================
+# Homepage is a modern, fully static, fast, secure fully proxied, highly customizable application dashboard.
+# Website: https://gethomepage.dev/
+
+# The Homepage color scheme.
+homepage_color: 'white'
+
+# The Homepage favicon.
+homepage_favicon: ''
+
+# The Homepage header style.
+# Options: underlined, boxed, clean, boxedWidgets
+homepage_header: 'underlined'
+
+# The Homepage theme.
+homepage_theme: 'light'
+
+# The Homepage title.
+homepage_title: 'Homepage!'
+
+# --- | If the proxy is running
+
+# The Homepage domain (required when using the public network).
+homepage_domain: ''
+
+# The Homepage port.
+homepage_port: 3000
+...

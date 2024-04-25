@@ -2,63 +2,64 @@
 
 # ---------- | Ubuntu | Debian | ----------
 
-- name: Update Debian/Ubuntu packages
-  when: ansible_distribution|lower in ['debian','ubuntu']
+- name: 'Update Debian/Ubuntu packages'
+  when: "ansible_distribution|lower in ['debian','ubuntu']"
   block:
-    - name: Update 'apt' packages
+    - name: "Update 'apt' packages"
       ansible.builtin.apt:
         update_cache: true
-        upgrade: full
+        upgrade: 'full'
         cache_valid_time: 3600
 
-    - name: Check if reboot is required
+    - name: 'Check if reboot is required'
       ansible.builtin.stat:
-        path: /var/run/reboot-required
-      register: reboot_check
+        path: '/var/run/reboot-required'
+      register: 'reboot_check'
 
-    - name: Convert the 'reboot' check to a boolean
+    - name: "Convert the 'reboot' check to a boolean"
       ansible.builtin.set_fact:
         reboot_required: "{{ reboot_check.stat.exists | bool }}"
 
 # ---------- | CentOS | Fedora | RedHat | ----------
 
-- name: Update CentOS/Fedora/RedHat
-  when: ansible_distribution|lower in ['centos','fedora','redhat']
+- name: 'Update CentOS/Fedora/RedHat'
+  when: "ansible_distribution|lower in ['centos','fedora','redhat']"
   block:
-    - name: Update 'dnf' packages
+    - name: "Update 'dnf' packages"
       ansible.builtin.dnf:
         name: "*"
-        state: latest
+        state: 'latest'
         update_only: true
 
-    - name: Install 'dnf-utils' package
+    - name: "Install 'dnf-utils' package"
       ansible.builtin.dnf:
-        name: dnf-utils
-        state: present
+        name: 'dnf-utils'
+        state: 'present'
 
-    - name: Check if reboot is required
+    - name: 'Check if reboot is required'
       ansible.builtin.command:
-        cmd: needs-restarting -r
-      register: reboot_check
+        cmd: 'needs-restarting -r'
+      register: 'reboot_check'
       ignore_errors: true
 
-    - name: Convert the 'reboot' check to a boolean
+    - name: "Convert the 'reboot' check to a boolean"
       ansible.builtin.set_fact:
         reboot_required: "{{ reboot_check.rc|default(1) == 0 }}"
 
 # ---------- | Alpine | ----------
 
-- name: Update Alpine
-  when: ansible_distribution|lower == 'alpine'
+- name: 'Update Alpine'
+  when: "ansible_distribution|lower == 'alpine'"
   block:
-    - name: Update 'apk' packages
+    - name: "Update 'apk' packages"
       community.general.apk:
         update_cache: true
         upgrade: true
 
 # ---------- ~ Reboot ~ ----------
 
-- name: Reboot if required
+- name: 'Reboot if required'
   ansible.builtin.reboot:
-    msg: Rebooting the system to apply updates
-  when: reboot_required|default(false)
+    msg: 'Rebooting the system to apply updates'
+  when: 'reboot_required|default(false)'
+...

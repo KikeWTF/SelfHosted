@@ -1,0 +1,30 @@
+---
+{% if docker_network_public.exists|bool %}
+base: https://{{ homepage_domain }}
+{% endif %}
+title: "{{ homepage_title }}"
+theme: "{{ homepage_theme }}"
+color: "{{ homepage_color }}"
+{% if homepage_favicon|length > 0 %}
+favicon: "{{ homepage_favicon }}"
+{% endif %}
+layout:
+  Management:
+    style: row
+    columns: 4
+  Services:
+    style: row
+    columns: 4
+useEqualHeights: true
+headerStyle: "{{ homepage_header }}"
+language: en
+target: _blank
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  showSearchSuggestions: false
+  hideVisitURL: true
+hideVersion: true
+logpath: homepage.log
+showStats: false
+statusStyle: "dot"

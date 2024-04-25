@@ -1,0 +1,33 @@
+---
+- name: "Check if the 'public' network exists"
+  community.docker.docker_network_info:
+    name: 'public'
+  register: 'docker_network_public'
+
+- name: 'Check that domain is defined if using a public network'
+  ansible.builtin.fail:
+    msg: "The domain (homepage_domain) is required when using the public network."
+  when: 'docker_network_public.exists and homepage_domain|trim|length == 0'
+
+- name: 'Ensure that the configuration folder exists'
+  ansible.builtin.file:
+    path: "{{ path_services }}/{{ service }}/config"
+    state: 'directory'
+    mode: '0700'
+    access_time: 'preserve'
+    modification_time: 'preserve'
+
+- name: 'Copy the configuration'
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ path_services }}/{{ service }}/config/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: '0600'
+  with_fileglob:
+    - "../templates/{{ service }}/config/*"
+
+- name: 'Copy all the icon files'
+  ansible.builtin.copy:
+    src: 'icons/'
+    dest: "{{ path_services }}/homepage/icons"
+    mode: '0600'
+...

@@ -1,11 +1,15 @@
 ---
 available_services:
-  - duckdns       # Dynamic DNS
-  - errorpages    # Custom error pages
-  - traefik       # Reverse proxy
-  - watchtower    # Automatic container updates
+  - 'duckdns'     # Dynamic DNS
+  - 'errorpages'  # Custom error pages
+  - 'homepage'    # Homepage
+  - 'postgres'    # PSQL database
+  - 'traefik'     # Reverse proxy
+  - 'watchtower'  # Automatic container updates
+  - 'wg-easy'     # WireGuard VPN server and dashboard
 
 networks:
-  public: 172.16.10.0/24
-  database: 127.16.20.0/24
-  identity: 127.16.30.0/24
+  public: '172.16.10.0/24'
+  database: '172.16.20.0/24'
+  identity: '172.16.30.0/24'
+...
