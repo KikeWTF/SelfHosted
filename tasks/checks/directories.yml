@@ -4,6 +4,8 @@
     path: "{{ directory }}"
     state: directory
     mode: '0700'
+    access_time: preserve
+    modification_time: preserve
   loop_control: { loop_var: directory }
   loop:
     - "{{ path_services }}"

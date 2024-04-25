@@ -1,6 +1,8 @@
 # ================================
 #     WatchTower Configuration
 # ================================
+# WatchTower is a process for automating Docker container base image updates.
+# Website: https://containrrr.dev/watchtower/
 
 # When the containers should be updated.
 watchtower_cron: '0 0 4 * * *'

@@ -1,13 +1,10 @@
 ---
 available_services:
-  - cli-mysql
-  - cli-psql
   - duckdns
-  - homepage
-  - mariadb
-  - openldap
-  - phpldapadmin
-  - postgresql
-  - redis
   - traefik
   - watchtower
+
+networks:
+  public:   172.16.10.0/24
+  database: 127.16.20.0/24
+  identity: 127.16.30.0/24

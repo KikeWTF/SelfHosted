@@ -10,6 +10,8 @@
     path: "{{ path_services }}/{{ service }}"
     state: directory
     mode: '0700'
+    access_time: preserve
+    modification_time: preserve
   when: state != 'absent'
 
 - name: Ensure that the configuration is available

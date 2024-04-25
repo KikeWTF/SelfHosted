@@ -1,0 +1,28 @@
+---
+- name: Check that Cloudflare tokens are provided if Cloudflare is the selected provider
+  ansible.builtin.fail:
+    msg: "The Cloudflare API token (token_cloudflare) is required."
+  when: traefik_provider == 'cloudflare' and token_cloudflare|length == 0
+
+- name: Ensure that the configuration folder exists
+  ansible.builtin.file:
+    path: "{{ path_services }}/{{ service }}/config/dynamic"
+    state: directory
+    mode: "0700"
+    access_time: preserve
+    modification_time: preserve
+
+- name: Copy the static configuration
+  ansible.builtin.template:
+    src: "{{ service }}/config/traefik.yml.j2"
+    dest: "{{ path_services }}/{{ service }}/config/traefik.yml"
+    mode: "0600"
+
+- name: Copy the dynamic configuration
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ path_services }}/{{ service }}/config/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: "0600"
+  with_fileglob:
+    - "../templates/{{ service }}/config/*.j2"
+  

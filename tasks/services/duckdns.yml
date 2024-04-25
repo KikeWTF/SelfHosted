@@ -6,5 +6,5 @@
 
 - name: Check that the DuckDNS token is defined
   ansible.builtin.fail:
-    msg: "The DuckDNS token (duckdns_token) is required."
-  when: duckdns_token|length == 0 and state != 'absent'
+    msg: "The DuckDNS token (token_duckdns) is required."
+  when: token_duckdns|length == 0 and state != 'absent'

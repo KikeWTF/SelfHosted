@@ -1,0 +1,16 @@
+# ================================
+#       Traefik Configuration
+# ================================
+# Traefik is an open-source Edge Router that makes publishing your services a fun and easy experience.
+# Website: https://traefik.io/
+
+# Traefik development mode (SSL staging certificates).
+traefik_dev: false
+
+# The SSL provider (cloudflare, duckdns, ...).
+traefik_provider: ''
+
+# --- | Provider tokens | ---
+
+# The Cloudflare API token (provider: cloudflare).
+token_cloudflare: ''

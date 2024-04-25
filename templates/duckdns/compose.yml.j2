@@ -24,7 +24,7 @@ services:
       TZ: "{{ timezone }}"
       UPDATE_IP: "{{ duckdns_update }}"
       SUBDOMAINS: "{{ duckdns_subdomains|join(',') }}"
-      TOKEN: "{{ duckdns_token }}"
+      TOKEN: "{{ token_duckdns }}"
     labels:
       com.centurylinklabs.watchtower.enable: true
       homepage.name: DuckDNS

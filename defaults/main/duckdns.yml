@@ -1,6 +1,8 @@
 # ================================
 #       DuckDNS Configuration
 # ================================
+# DuckDNS is a free service which will point a DNS (sub domains of duckdns.org) to an IP of your choice.
+# Website: https://www.duckdns.org/
 
 # Which IP to update (ipv4, ipv6, both).
 duckdns_update: both
@@ -9,4 +11,4 @@ duckdns_update: both
 duckdns_subdomains: []
 
 # The DuckDNS token.
-duckdns_token: ''
+token_duckdns: ''

@@ -1,0 +1,79 @@
+---
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+entryPoints:
+  ssh:
+    address: ':22/tcp'
+  https:
+    address: ':443/tcp'
+    http:
+      middlewares:
+        - compression@file
+        - errors@file
+        - jokes@file
+        - security@file
+      tls:
+        options: default
+        certResolver: challenge
+{% if domains|length > 0 %}
+        domains:
+{% for domain in domains %}
+          - main: '{{ domain }}'
+            sans:
+              - '*.{{ domain }}'
+{% endfor %}
+{% endif %}
+    http2:
+      maxConcurrentStreams: 250
+    http3:
+      advertisedPort: 443
+  healthcheck:
+    address: '127.0.0.1:9999/tcp'
+providers:
+  providersThrottleDuration: 2s
+  docker:
+    watch: true
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    useBindPortIP: false
+    network: proxy
+    allowEmptyServices: false
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+# TODO: Secure the API with custom routers and middlewares
+api:
+  insecure: true
+  dashboard: true
+  disableDashboardAd: true
+# TODO: Metrics (Prometheus)
+ping:
+  entryPoint: healthcheck
+log:
+  level: debug
+accessLog:
+  filters:
+    statusCodes:
+      - "200"
+certificatesResolvers:
+  challenge:
+    acme:
+{% if email_administrator|length > 0 %}
+      email: "{{ email_administrator }}"
+{% endif %}
+      caServer: "https://acme-{{ 'staging-' if traefik_dev|bool else '' }}v02.api.letsencrypt.org/directory"
+      storage: /certificates/acme.json
+{% if traefik_provider|length > 0 %}
+      dnsChallenge:
+        provider: "{{ traefik_provider }}"
+        delayBeforeCheck: 10s
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
+        disablePropagationCheck: false
+{% else %}
+      tlsChallenge: {}
+{% endif %}
+experimental:
+  http3: true

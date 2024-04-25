@@ -9,6 +9,9 @@ state: present
 # The server domain(s).
 domains: []
 
+# The email address of the administrator.
+email_administrator: "admin@{{ domains[0] if domains|length > 0 else 'localhost' }}"
+
 # The managed services. At least one service is required.
 services: []
 
