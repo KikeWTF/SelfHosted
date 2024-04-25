@@ -1,0 +1,22 @@
+---
+# ================================
+#       Server Configuration
+# ================================
+
+# The result state of each service. Options are [present, stopped, absent].
+state: present
+
+# The server domain(s).
+domains: []
+
+# The managed services. At least one service is required.
+services: []
+
+# The path to the data directory.
+path_data: /mnt/data
+
+# The path to the services directory.
+path_services: /mnt/services
+
+# The timezone of the server.
+timezone: Europe/Madrid

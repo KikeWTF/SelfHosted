@@ -1,0 +1,10 @@
+---
+- name: Check that at least one subdomain is defined
+  ansible.builtin.fail:
+    msg: "At least one DuckDNS subdomain (duckdns_subdomains) is required."
+  when: duckdns_subdomains|length == 0 and state != 'absent'
+
+- name: Check that the DuckDNS token is defined
+  ansible.builtin.fail:
+    msg: "The DuckDNS token (duckdns_token) is required."
+  when: duckdns_token|length == 0 and state != 'absent'

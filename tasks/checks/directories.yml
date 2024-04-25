@@ -1,0 +1,10 @@
+---
+- name: Ensure that the services and data directory exists
+  ansible.builtin.file:
+    path: "{{ directory }}"
+    state: directory
+    mode: '0700'
+  loop_control: { loop_var: directory }
+  loop:
+    - "{{ path_services }}"
+    - "{{ path_data }}"

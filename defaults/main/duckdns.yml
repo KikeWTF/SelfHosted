@@ -1,0 +1,12 @@
+# ================================
+#       DuckDNS Configuration
+# ================================
+
+# Which IP to update (ipv4, ipv6, both).
+duckdns_update: both
+
+# The DuckDNS subdomains.
+duckdns_subdomains: []
+
+# The DuckDNS token.
+duckdns_token: ''

@@ -6,5 +6,12 @@
 
 - name: Ensure that the state is correctly set
   ansible.builtin.fail:
-    msg: "'state' variable must be one of [running, present, stopped, absent]."
-  when: state not in ['running', 'present', 'stopped', 'absent']
+    msg: "'state' variable must be one of [present, stopped, absent]."
+  when: state not in ['present', 'stopped', 'absent']
+
+- name: Ensure that the services are available
+  ansible.builtin.fail:
+    msg: "The '{{ service }}' service is not available."
+  loop_control: { loop_var: service }
+  loop: "{{ services }}"
+  when: service not in available_services

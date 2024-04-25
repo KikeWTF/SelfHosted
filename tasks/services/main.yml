@@ -1,0 +1,34 @@
+---
+- name: Remove the service directory
+  ansible.builtin.file:
+    path: "{{ path_services }}/{{ service }}"
+    state: absent
+  when: state == 'absent'
+
+- name: Ensure that the service directory exists
+  ansible.builtin.file:
+    path: "{{ path_services }}/{{ service }}"
+    state: directory
+    mode: '0700'
+  when: state != 'absent'
+
+- name: Ensure that the configuration is available
+  ansible.builtin.import_tasks: "{{ service }}.yml"
+
+- name: Create the compose file
+  ansible.builtin.template:
+    src: "{{ service }}/compose.yml.j2"
+    dest: "{{ path_services }}/{{ service }}/compose.yml"
+    mode: '0600'
+  when: state != 'absent'
+
+- name: Manage the service
+  community.docker.docker_compose_v2:
+    project_src: "{{ path_services }}/{{ service }}"
+    state: "{{ state }}"
+    build: policy
+    pull: policy
+    recreate: always
+    remove_images: all
+    remove_orphans: true
+    remove_volumes: true

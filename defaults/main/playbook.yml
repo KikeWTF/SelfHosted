@@ -1,0 +1,6 @@
+# ================================
+#        Role Configuration
+# ================================
+
+# Skip the previous checks (update the packages, install the dependencies, etc.)
+skip_checks: false

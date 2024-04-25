@@ -1,2 +1,13 @@
 ---
-# vars file for selfhosted
+available_services:
+  - cli-mysql
+  - cli-psql
+  - duckdns
+  - homepage
+  - mariadb
+  - openldap
+  - phpldapadmin
+  - postgresql
+  - redis
+  - traefik
+  - watchtower

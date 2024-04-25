@@ -1,0 +1,6 @@
+# ================================
+#     WatchTower Configuration
+# ================================
+
+# When the containers should be updated.
+watchtower_cron: '0 0 4 * * *'

@@ -1,0 +1,33 @@
+---
+services:
+  duckdns:
+    container_name: duckdns
+    hostname: duckdns
+    image: linuxserver/duckdns:latest
+    security_opt:
+      - no-new-privileges
+    restart: unless-stopped
+    network_mode: host
+    logging:
+      driver: json-file
+      options:
+        max-file: 1
+        max-size: 10m
+    healthcheck:
+      test: /usr/bin/timeout 5s /bin/sh -c "wget --spider 'https://www.duckdns.org/update' || exit 1"
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: "{{ timezone }}"
+      UPDATE_IP: "{{ duckdns_update }}"
+      SUBDOMAINS: "{{ duckdns_subdomains|join(',') }}"
+      TOKEN: "{{ duckdns_token }}"
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.name: DuckDNS
+      homepage.group: Services
+      homepage.description: Dynamic DNS
+      homepage.icon: /icons/duckdns.png

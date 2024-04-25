@@ -2,3 +2,7 @@
 - name: Launch all the checks
   ansible.builtin.include_tasks: checks/main.yml
 
+- name: Manage the service
+  ansible.builtin.include_tasks: services/main.yml
+  loop_control: { loop_var: service }
+  loop: "{{ services }}"
