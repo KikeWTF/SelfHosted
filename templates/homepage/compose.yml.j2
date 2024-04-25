@@ -7,38 +7,44 @@ networks:
 {% endif %}
 services:
   homepage:
-    container_name: homepage
-    hostname: homepage
-    image: ghcr.io/gethomepage/homepage:latest
+    container_name: 'homepage'
+    hostname: 'homepage'
+    image: 'ghcr.io/gethomepage/homepage:latest'
 {% if docker_network_public.exists|bool %}
     networks:
-      - public
+      - 'public'
 {% else %}
     ports: ["{{ homepage_port }}:3000/tcp"]
 {% endif %}
-    security_opt: [no-new-privileges]
-    restart: unless-stopped
+    security_opt:
+      - 'no-new-privileges'
+    dns:
+      - "{{ ansible_default_ipv4['address'] }}"
+      - '1.1.1.1'
+      - '8.8.8.8'
+    restart: 'unless-stopped'
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
         max-file: 1
-        max-size: 10m
+        max-size: '10m'
     healthcheck:
-      test: /usr/bin/timeout 10s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:3000/api/healthcheck || exit 1'
-      interval: 1m
-      timeout: 5s
+      test: "/usr/bin/timeout 10s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:3000/api/healthcheck || exit 1'"
+      interval: '1m'
+      timeout: '5s'
       retries: 3
     volumes:
-      - ./config:/app/config:ro
-      - ./icons:/app/public/icons:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - './config:/app/config:ro'
+      - './icons:/app/public/icons:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
     labels:
       com.centurylinklabs.watchtower.enable: true
 {% if docker_network_public.exists|bool %}
       traefik.enable: true
-      traefik.http.routers.homepage.rule: Host(`{{ homepage_domain }}`)
-      traefik.http.routers.homepage.entrypoints: https
-      traefik.http.routers.homepage.service: homepage
-      traefik.http.routers.homepage.middlewares: internal@file
+      traefik.http.routers.homepage.rule: "Host(`{{ homepage_domain }}`)"
+      traefik.http.routers.homepage.entrypoints: 'https'
+      traefik.http.routers.homepage.service: 'homepage'
+      traefik.http.routers.homepage.middlewares: 'internal@file'
       traefik.http.services.homepage.loadbalancer.server.port: 3000
 {% endif %}
+...

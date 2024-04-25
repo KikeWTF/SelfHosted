@@ -5,29 +5,34 @@ networks:
 
 services:
   wg-easy:
-    container_name: wg-easy
-    hostname: wg-easy
-    image: ghcr.io/wg-easy/wg-easy:latest
-    security_opt: [no-new-privileges]
-    restart: unless-stopped
+    container_name: 'wg-easy'
+    hostname: 'wg-easy'
+    image: 'ghcr.io/wg-easy/wg-easy:latest'
+    security_opt:
+      - 'no-new-privileges'
+    restart: 'unless-stopped'
+    dns:
+      - "{{ ansible_default_ipv4['address'] }}"
+      - '1.1.1.1'
+      - '8.8.8.8'
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
         max-file: 1
-        max-size: 10m
+        max-size: '10m'
     cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
+      - 'NET_ADMIN'
+      - 'SYS_MODULE'
     sysctls:
-      - net.ipv4.ip_forward=1
-      - net.ipv4.conf.all.src_valid_mark=1
+      net.ipv4.ip_forward: 1
+      net.ipv4.conf.all.src_valid_mark: 1
     healthcheck:
-      test: /usr/bin/timeout 5s /bin/sh -c "/usr/bin/wg show | /bin/grep -q interface || exit 1"
-      interval: 1m
-      timeout: 5s
+      test: "/usr/bin/timeout 5s /bin/sh -c '/usr/bin/wg show | /bin/grep -q interface || exit 1'"
+      interval: '1m'
+      timeout: '5s'
       retries: 3
     networks:
-      - public
+      - 'public'
     volumes:
       - "{{ path_data }}/wg-easy:/etc/wireguard:rw"
     environment:
@@ -41,18 +46,19 @@ services:
       WG_ALLOWED_IPS: "{{ wg_easy_allowed_ips }}"
     labels:
       com.centurylinklabs.watchtower.enable: true
-      homepage.name: WG-Easy
-      homepage.group: Management
-      homepage.description: WireGuard VPN
-      homepage.icon: /icons/wg-easy.png
+      homepage.name: 'WG-Easy'
+      homepage.group: 'Management'
+      homepage.description: 'WireGuard VPN'
+      homepage.icon: '/icons/wg-easy.png'
       homepage.href: "https://{{ wg_easy_domain }}{{ wg_easy_path }}/"
       traefik.enable: true
-      traefik.http.routers.wg-easy.rule: Host(`{{ wg_easy_domain }}`) && PathPrefix(`{{ wg_easy_path }}/`)
-      traefik.http.routers.wg-easy.entrypoints: https
-      traefik.http.routers.wg-easy.service: wg-easy
-      traefik.http.routers.wg-easy.middlewares: wg-easy@docker
+      traefik.http.routers.wg-easy.rule: "Host(`{{ wg_easy_domain }}`) && PathPrefix(`{{ wg_easy_path }}/`)"
+      traefik.http.routers.wg-easy.entrypoints: 'https'
+      traefik.http.routers.wg-easy.service: 'wg-easy'
+      traefik.http.routers.wg-easy.middlewares: 'wg-easy@docker'
       traefik.http.services.wg-easy.loadbalancer.server.port: 51821
       traefik.http.middlewares.wg-easy.stripprefix.prefixes: "{{ wg_easy_path }}"
-      traefik.udp.routers.wg-easy.entrypoints: wireguard
-      traefik.udp.routers.wg-easy.service: wg-easy
+      traefik.udp.routers.wg-easy.entrypoints: 'wireguard'
+      traefik.udp.routers.wg-easy.service: 'wg-easy'
       traefik.udp.services.wg-easy.loadbalancer.server.port: 51820
+...

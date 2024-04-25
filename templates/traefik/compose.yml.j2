@@ -1,54 +1,60 @@
 ---
 networks:
   public:
-    name: public
-    driver: bridge
+    name: 'public'
+    driver: 'bridge'
     ipam:
       config:
         - subnet: "{{ networks['public']|default('172.16.0.0/24') }}"
 
 services:
   traefik:
-    container_name: traefik
-    hostname: traefik
-    image: traefik:latest
+    container_name: 'traefik'
+    hostname: 'traefik'
+    image: 'traefik:latest'
     networks:
-      - public
-    security_opt: [no-new-privileges]
-    restart: unless-stopped
+      - 'public'
+    security_opt:
+      - 'no-new-privileges'
+    dns:
+      - "{{ ansible_default_ipv4['address'] }}"
+      - '1.1.1.1'
+      - '8.8.8.8'
+    restart: 'unless-stopped'
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
         max-file: 1
-        max-size: 10m
+        max-size: '10m'
     healthcheck:
-      test: /usr/bin/timeout 5s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:9999/ping'
-      interval: 1m
-      timeout: 5s
+      test: "/usr/bin/timeout 5s /bin/sh -c '/usr/bin/wget --spider http://127.0.0.1:9999/ping'"
+      interval: '1m'
+      timeout: '5s'
       retries: 3
     ports:
-      - 22:22/tcp
-      - 443:443/tcp
-      - 51820:51820/udp
+      - '22:22/tcp'
+      - '443:443/tcp'
+      - '51820:51820/udp'
 {% if traefik_dashboard|bool %}
-      - 8080:8080/tcp
+      - '8080:8080/tcp'
 {% endif %}
     volumes:
       - "{{ path_data }}/traefik:/certificates:rw"
-      - ./config:/etc/traefik:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - './config:/etc/traefik:ro'
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
 {% if traefik_provider|length > 0 %}
     environment:
-{% if traefik_provider == "cloudflare" %}
-      CF_DNS_API_TOKEN: '{{ token_cloudflare }}'
+{% if traefik_provider == 'cloudflare' %}
+      CF_DNS_API_TOKEN: "{{ token_cloudflare }}"
 {% endif %}
 {% endif %}
     labels:
       com.centurylinklabs.watchtower.enable: true
-      homepage.name: Traefik
-      homepage.group: Services
-      homepage.description: Reverse proxy
-      homepage.icon: /icons/traefik.png
+      homepage.name: 'Traefik'
+      homepage.group: 'Services'
+      homepage.description: 'Reverse proxy'
+      homepage.icon: '/icons/traefik.png'
       # TODO: Add widget
       #homepage.widget.type: traefik
       #homepage.widget.url:
+...

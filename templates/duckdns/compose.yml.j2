@@ -1,22 +1,26 @@
 ---
 services:
   duckdns:
-    container_name: duckdns
-    hostname: duckdns
-    image: linuxserver/duckdns:latest
+    container_name: 'duckdns'
+    hostname: 'duckdns'
+    image: 'linuxserver/duckdns:latest'
     security_opt:
-      - no-new-privileges
-    restart: unless-stopped
-    network_mode: host
+      - 'no-new-privileges'
+    dns:
+      - "{{ ansible_default_ipv4['address'] }}"
+      - '1.1.1.1'
+      - '8.8.8.8'
+    restart: 'unless-stopped'
+    network_mode: 'host'
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
         max-file: 1
-        max-size: 10m
+        max-size: '10m'
     healthcheck:
-      test: /usr/bin/timeout 5s /bin/sh -c "wget --spider 'https://www.duckdns.org/update' || exit 1"
-      interval: 1m
-      timeout: 5s
+      test: "/usr/bin/timeout 5s /bin/sh -c 'wget --spider https://www.duckdns.org/update || exit 1'"
+      interval: '1m'
+      timeout: '5s'
       retries: 3
     environment:
       PUID: 1000
@@ -27,7 +31,8 @@ services:
       TOKEN: "{{ token_duckdns }}"
     labels:
       com.centurylinklabs.watchtower.enable: true
-      homepage.name: DuckDNS
-      homepage.group: Services
-      homepage.description: Dynamic DNS
-      homepage.icon: /icons/duckdns.png
+      homepage.name: 'DuckDNS'
+      homepage.group: 'Services'
+      homepage.description: 'Dynamic DNS'
+      homepage.icon: '/icons/duckdns.png'
+...

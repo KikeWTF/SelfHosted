@@ -7,41 +7,47 @@ networks:
 {% endif %}
 services:
   errorpages:
-    container_name: errorpages
-    hostname: errorpages
-    image: tarampampam/error-pages:latest
+    container_name: 'errorpages'
+    hostname: 'errorpages'
+    image: 'tarampampam/error-pages:latest'
 {% if docker_network_public.exists|bool %}
     networks:
-      - public
+      - 'public'
 {% else %}
     ports: ["{{ errorpages_port }}:8080/tcp"]
 {% endif %}
-    security_opt: [no-new-privileges]
-    restart: unless-stopped
+    security_opt:
+      - 'no-new-privileges'
+    dns:
+      - "{{ ansible_default_ipv4['address'] }}"
+      - '1.1.1.1'
+      - '8.8.8.8'
+    restart: 'unless-stopped'
     logging:
-      driver: json-file
+      driver: 'json-file'
       options:
         max-file: 1
-        max-size: 10m
+        max-size: '10m'
     healthcheck:
-      test: [ CMD, "/bin/error-pages", "--log-json", "healthcheck" ]
-      interval: 1m
-      timeout: 5s
+      test: [ 'CMD', '/bin/error-pages', '--log-json', 'healthcheck' ]
+      interval: '1m'
+      timeout: '5s'
       retries: 3
     environment:
       TEMPLATE_NAME: "{{ errorpages_theme }}"
       SHOW_DETAILS: "{{ errorpages_details }}"
     labels:
       com.centurylinklabs.watchtower.enable: true
-      homepage.name: ErrorPages
-      homepage.group: Services
-      homepage.description: Custom error pages
-      homepage.icon: /icons/errorpages.png
+      homepage.name: 'ErrorPages'
+      homepage.group: 'Services'
+      homepage.description: 'Custom error pages'
+      homepage.icon: '/icons/errorpages.png'
 {% if docker_network_public.exists|bool %}
       traefik.enable: true
-      traefik.http.routers.errorpages.rule: HostRegexp(`{host:.+}`)
+      traefik.http.routers.errorpages.rule: "HostRegexp(`{host:.+}`)"
       traefik.http.routers.errorpages.priority: 10
-      traefik.http.routers.errorpages.entrypoints: https
-      traefik.http.routers.errorpages.service: errorpages
+      traefik.http.routers.errorpages.entrypoints: 'https'
+      traefik.http.routers.errorpages.service: 'errorpages'
       traefik.http.services.errorpages.loadbalancer.server.port: 8080
 {% endif %}
+...
