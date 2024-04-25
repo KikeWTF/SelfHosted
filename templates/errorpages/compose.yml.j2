@@ -1,0 +1,47 @@
+---
+{% if docker_network_public.exists|bool %}
+networks:
+  public:
+    external: true
+
+{% endif %}
+services:
+  errorpages:
+    container_name: errorpages
+    hostname: errorpages
+    image: tarampampam/error-pages:latest
+{% if docker_network_public.exists|bool %}
+    networks:
+      - public
+{% else %}
+    ports: ["{{ errorpages_port }}:8080/tcp"]
+{% endif %}
+    security_opt: [no-new-privileges]
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-file: 1
+        max-size: 10m
+    healthcheck:
+      test: [ CMD, "/bin/error-pages", "--log-json", "healthcheck" ]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+    environment:
+      TEMPLATE_NAME: "{{ errorpages_theme }}"
+      SHOW_DETAILS: "{{ errorpages_details }}"
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.name: ErrorPages
+      homepage.group: Services
+      homepage.description: Custom error pages
+      homepage.icon: /icons/errorpages.png
+{% if docker_network_public.exists|bool %}
+      traefik.enable: true
+      traefik.http.routers.errorpages.rule: HostRegexp(`{host:.+}`)
+      traefik.http.routers.errorpages.priority: 10
+      traefik.http.routers.errorpages.entrypoints: https
+      traefik.http.routers.errorpages.service: errorpages
+      traefik.http.services.errorpages.loadbalancer.server.port: 8080
+{% endif %}

@@ -4,5 +4,5 @@
 
 - name: Manage the service
   ansible.builtin.include_tasks: services/main.yml
-  loop_control: { loop_var: service }
+  loop_control: {loop_var: service}
   loop: "{{ services }}"

@@ -1,10 +1,11 @@
 ---
 available_services:
-  - duckdns
-  - traefik
-  - watchtower
+  - duckdns       # Dynamic DNS
+  - errorpages    # Custom error pages
+  - traefik       # Reverse proxy
+  - watchtower    # Automatic container updates
 
 networks:
-  public:   172.16.10.0/24
+  public: 172.16.10.0/24
   database: 127.16.20.0/24
   identity: 127.16.30.0/24

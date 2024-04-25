@@ -1,0 +1,17 @@
+---
+# ================================
+#     ErrorPages Configuration
+# ================================
+# Error Pages is a simple, standalone, self-hosted, extensible, lightweight and easy-to-use error pages for your web applications.
+# Website: https://tarampampam.github.io/error-pages/
+
+# If detailed ErrorPages should be shown
+errorpages_details: true
+
+# The ErrorPages theme (ghost, l7-light, l7-dark, shuffle, noise, hacker-terminal, cats, lost-in-space, app-down, connection, matrix, orient)
+errorpages_theme: l7-dark
+
+# --- | If the proxy is running
+
+# The ErrorPages port
+errorpages_port: 8080

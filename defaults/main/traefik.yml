@@ -1,8 +1,12 @@
+---
 # ================================
 #       Traefik Configuration
 # ================================
 # Traefik is an open-source Edge Router that makes publishing your services a fun and easy experience.
 # Website: https://traefik.io/
+
+# Traefik dashboard and API exposed on port 8080.
+traefik_dashboard: false
 
 # Traefik development mode (SSL staging certificates).
 traefik_dev: false

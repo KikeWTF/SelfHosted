@@ -6,7 +6,7 @@
     mode: '0700'
     access_time: preserve
     modification_time: preserve
-  loop_control: { loop_var: directory }
+  loop_control: {loop_var: directory}
   loop:
     - "{{ path_services }}"
     - "{{ path_data }}"

@@ -4,15 +4,15 @@
   ansible.builtin.package:
     name: "{{ package }}"
     state: present
-  loop_control: { loop_var: package }
+  loop_control: {loop_var: package}
   loop:
     - openrc
     - docker
     - docker-cli-compose
 
-#TODO Docker installation on Debian/Ubuntu
+# TODO Docker installation on Debian/Ubuntu
 
-#TODO Docker installation on CentOS/Fedora/RedHat
+# TODO Docker installation on CentOS/Fedora/RedHat
 
 - name: Enable and start Docker
   ansible.builtin.service:

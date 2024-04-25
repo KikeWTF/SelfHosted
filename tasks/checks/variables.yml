@@ -12,6 +12,6 @@
 - name: Ensure that the services are available
   ansible.builtin.fail:
     msg: "The '{{ service }}' service is not available."
-  loop_control: { loop_var: service }
+  loop_control: {loop_var: service}
   loop: "{{ services }}"
   when: service not in available_services

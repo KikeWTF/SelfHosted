@@ -1,0 +1,5 @@
+---
+- name: Check if the 'public' network exists
+  community.docker.docker_network_info:
+    name: public
+  register: docker_network_public

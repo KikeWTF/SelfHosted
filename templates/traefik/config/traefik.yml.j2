@@ -44,8 +44,8 @@ providers:
     watch: true
 # TODO: Secure the API with custom routers and middlewares
 api:
-  insecure: true
-  dashboard: true
+  insecure: {{ traefik_dashboard|bool }}
+  dashboard: {{ traefik_dashboard|bool }}
   disableDashboardAd: true
 # TODO: Metrics (Prometheus)
 ping:

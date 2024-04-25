@@ -15,7 +15,7 @@
       ansible.builtin.stat:
         path: /var/run/reboot-required
       register: reboot_check
-    
+
     - name: Convert the 'reboot' check to a boolean
       ansible.builtin.set_fact:
         reboot_required: "{{ reboot_check.stat.exists | bool }}"
@@ -35,13 +35,13 @@
       ansible.builtin.dnf:
         name: dnf-utils
         state: present
-    
+
     - name: Check if reboot is required
       ansible.builtin.command:
         cmd: needs-restarting -r
       register: reboot_check
       ignore_errors: true
-    
+
     - name: Convert the 'reboot' check to a boolean
       ansible.builtin.set_fact:
         reboot_required: "{{ reboot_check.rc|default(1) == 0 }}"

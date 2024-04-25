@@ -29,6 +29,9 @@ services:
     ports:
       - 22:22/tcp
       - 443:443/tcp
+{% if traefik_dashboard|bool %}
+      - 8080:8080/tcp
+{% endif %}
     volumes:
       - "{{ path_data }}/traefik:/certificates:rw"
       - ./config:/etc/traefik:ro

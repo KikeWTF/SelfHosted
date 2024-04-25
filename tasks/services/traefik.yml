@@ -21,8 +21,7 @@
 - name: Copy the dynamic configuration
   ansible.builtin.template:
     src: "{{ item }}"
-    dest: "{{ path_services }}/{{ service }}/config/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    dest: "{{ path_services }}/{{ service }}/config/dynamic/{{ item | basename | regex_replace('\\.j2$', '') }}"
     mode: "0600"
   with_fileglob:
-    - "../templates/{{ service }}/config/*.j2"
-  
+    - "../templates/{{ service }}/config/dynamic/*"
