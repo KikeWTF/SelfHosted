@@ -19,7 +19,7 @@ services:
       PASSWORD: "{{ wg_easy_admin_pass }}"
       WG_HOST: "{{ wg_easy_domain }}"
       WG_DEFAULT_ADDRESS: "{{ wg_easy_subnet }}"
-      WG_DEFAULT_DNS: "{{ (networks['dns']|split('.'))[:3]|join('.') + '.254' if docker_network_dns.exists else wg_easy_dns }}"
+      WG_DEFAULT_DNS: "{{ (networks['dns']|split('.'))[:3]|join('.') + '.254' if docker_network_dns.exists else wg_easy_dns }}{{ ',' + wg_easy_search_base if wg_easy_search_base else '' }}"
       WG_ALLOWED_IPS: "{{ wg_easy_allowed_ips }}"
     healthcheck:
       test: "/usr/bin/timeout 5s /bin/sh -c '/usr/bin/wg show | /bin/grep -q interface || exit 1'"
@@ -27,7 +27,7 @@ services:
       timeout: '5s'
       retries: 3
     hostname: 'wg-easy'
-    image: 'weejewel/wg-easy:latest'
+    image: 'ghcr.io/wg-easy/wg-easy:latest'
     labels:
       com.centurylinklabs.watchtower.enable: true
       homepage.group: 'Management'
