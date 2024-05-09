@@ -1,9 +1,4 @@
 ---
-- name: 'Check that the WG-Easy domain is defined'
-  ansible.builtin.fail:
-    msg: "The WG-Easy domain (wg_easy_domain) is required."
-  when: 'wg_easy_domain|trim|length == 0'
-
 - name: 'Check that the WG-Easy admin password is defined'
   ansible.builtin.fail:
     msg: "The WG-Easy admin password (wg_easy_admin_pass) is required."
@@ -23,4 +18,9 @@
   ansible.builtin.fail:
     msg: "The 'public' network does not exist. This usually means that the 'traefik' service is not running."
   when: 'not docker_network_public.exists'
+
+- name: 'Check that the WG-Easy domain is defined'
+  ansible.builtin.fail:
+    msg: "The WG-Easy domain (wg_easy_domain) is required when using the public network."
+  when: 'docker_network_public.exists and wg_easy_domain|trim|length == 0'
 ...

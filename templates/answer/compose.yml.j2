@@ -1,0 +1,61 @@
+---
+{% if docker_network_public.exists %}
+networks:
+  public:
+    external: true
+
+{% endif %}
+services:
+  answer:
+    container_name: 'answer'
+    environment:
+      AUTO_INSTALL: true
+      DB_TYPE: 'sqlite3'
+      DB_FILE: '/data/answer.db'
+      LANGUAGE: 'en-US'
+      SITE_NAME: 'Answer'
+      SITE_URL: "http://{{ answer_domain }}{{ answer_path }}/"
+      CONTACT_EMAIL: "{{ answer_noreply }}"
+      ADMIN_NAME: "{{ answer_admin }}"
+      ADMIN_PASSWORD: "{{ answer_pass }}"
+      ADMIN_EMAIL: "{{ answer_email }}"
+      LOG_LEVEL: 'INFO'
+    healthcheck:
+      interval: '1m'
+      retries: 3
+      test: "/bin/sh -c '/usr/bin/wget --spider http://127.0.0.1{{ answer_path }}/ || exit 1'"
+      timeout: '5s'
+    hostname: 'answer'
+    image: 'apache/answer:latest'
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.group: 'Services'
+      homepage.name: 'Answer'
+      homepage.description: 'Q&A Website'
+      homepage.icon: '/icons/answer.png'
+{% if docker_network_public.exists %}
+      homepage.href: "http://{{ answer_domain }}{{ answer_path }}/"
+      traefik.enable: true
+      traefik.http.routers.answer.rule: "Host(`{{ answer_domain }}`) && PathPrefix(`{{ answer_path }}/`)"
+      traefik.http.routers.answer.entrypoints: 'https'
+      traefik.http.routers.answer.service: 'answer'
+      traefik.http.services.answer.loadbalancer.server.port: 80
+{% endif %}
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: 1
+        max-size: '10m'
+{% if docker_network_public.exists %}
+    networks:
+      - 'public'
+{% else %}
+    ports:
+      - "{{ dozzle_port }}:8080/tcp"
+{% endif %}
+    restart: 'unless-stopped'
+    security_opt:
+      - 'no-new-privileges'
+    volumes:
+      - "{{ path_data }}/answer:/data:rw"
+...

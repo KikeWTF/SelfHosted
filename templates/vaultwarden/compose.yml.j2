@@ -8,21 +8,13 @@ services:
     container_name: 'vaultwarden'
     environment:
       DOMAIN: "https://{{ vaultwarden_domain }}{{ vaultwarden_path }}/"
+    healthcheck:
+      interval: '1m'
+      retries: 3
+      test: '/healthcheck.sh'
+      timeout: '5s'
     hostname: 'vaultwarden'
     image: 'vaultwarden/server:latest'
-    security_opt:
-      - 'no-new-privileges'
-    restart: 'unless-stopped'
-    logging:
-      driver: 'json-file'
-      options:
-        max-file: 1
-        max-size: '10m'
-    healthcheck:
-      test: '/healthcheck.sh'
-      interval: '1m'
-      timeout: '5s'
-      retries: 3
     labels:
       com.centurylinklabs.watchtower.enable: true
       homepage.name: 'VaultWarden'
@@ -35,8 +27,16 @@ services:
       traefik.http.routers.vaultwarden.entrypoints: 'https'
       traefik.http.routers.vaultwarden.service: 'vaultwarden'
       traefik.http.services.vaultwarden.loadbalancer.server.port: 80
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: 1
+        max-size: '10m'
     networks:
       - 'public'
+    restart: 'unless-stopped'
+    security_opt:
+      - 'no-new-privileges'
     volumes:
       - '{{ path_data }}/vaultwarden:/data:rw'
 ...

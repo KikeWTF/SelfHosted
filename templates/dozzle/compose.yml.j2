@@ -35,12 +35,22 @@ services:
       traefik.http.routers.dozzle.entrypoints: 'https'
       traefik.http.routers.dozzle.service: 'dozzle'
       traefik.http.services.dozzle.loadbalancer.server.port: 8080
+{% endif %}
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: 1
+        max-size: '10m'
+{% if docker_network_public.exists %}
     networks:
       - 'public'
 {% else %}
     ports:
       - "{{ dozzle_port }}:8080/tcp"
 {% endif %}
+    restart: 'unless-stopped'
+    security_opt:
+      - 'no-new-privileges'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
 ...

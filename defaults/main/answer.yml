@@ -1,0 +1,28 @@
+---
+# ================================
+#       Answer Configuration
+# ================================
+# Answer is a self-hosted Stack Overflow clone.
+# Website: https://answer.apache.org
+
+# The Answer administrator username.
+answer_user: 'admin'
+
+# The Answer administrator password (required).
+answer_pass: ''
+
+# The Answer administrator email.
+answer_email: '{{ answer_user }}@localhost.localdomain'
+
+# The Answer no-reply email.
+answer_noreply: 'no-reply@localhost.localdomain'
+
+# The Answer domain (public network required).
+answer_domain: ''
+
+# The Answer path (public network required, avoid the trailing slash).
+answer_path: '/answer'
+
+# The Answer port (if public network does not exists).
+answer_port: 80
+...

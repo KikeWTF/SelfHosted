@@ -1,0 +1,16 @@
+---
+- name: "Check that the 'public' newtork exists"
+  community.docker.docker_network_info:
+    name: 'public'
+  register: 'docker_network_public'
+
+- name: 'Check that the Answer password is defined'
+  ansible.builtin.fail:
+    msg: "The Answer password (answer_pass) is required."
+  when: 'answer_pass|trim|length == 0'
+
+- name: 'Check that the Answer domain is defined'
+  ansible.builtin.fail:
+    msg: "The Answer domain (answer_domain) is required when using the public network."
+  when: 'docker_network_public.exists and answer_domain|trim|length == 0'
+...

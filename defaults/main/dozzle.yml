@@ -8,6 +8,9 @@
 # Disable Dozzle actions.
 dozzle_readonly: false
 
+# The Dozzle domain (public network required).
+dozzle_domain: "{{ dozzle_domain }}"
+
 # The Dozzle path (public network required, avoid the trailing slash).
 dozzle_path: '/dozzle'
 

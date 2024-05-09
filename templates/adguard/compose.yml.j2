@@ -21,28 +21,6 @@ services:
       timeout: '5s'
     hostname: 'adguard'
     image: 'adguard/adguardhome:latest'
-    networks:
-      dns:
-        ipv4_address: "{{ (networks['dns']|split('.'))[:3]|join('.') }}.254"
-{% if docker_network_public.exists %}
-      public: {}
-{% endif %}
-    ports:
-{% if 'tcp' in adguard_protocols %}
-      - '{{ adguard_port }}:53/tcp'
-{% endif %}
-{% if 'udp' in adguard_protocols %}
-      - '{{ adguard_port }}:53/udp'
-{% endif %}
-      - '3000:3000/tcp'
-{% if not docker_network_public.exists %}
-      - '80:80/tcp'
-      - '443:443/tcp'
-{% endif %}
-    restart: 'unless-stopped'
-    volumes:
-      - "{{ path_data }}/adguard/conf:/opt/adguardhome/conf:rw"
-      - "{{ path_data }}/adguard/work:/opt/adguardhome/work:rw"
     labels:
       com.centurylinklabs.watchtower.enable: true
       homepage.group: 'Management'
@@ -62,4 +40,33 @@ services:
       traefik.http.middlewares.adguard-redirect.plugin.rewriteheaders.rewrites[0].regex: '^/(.*)$'
       traefik.http.middlewares.adguard-redirect.plugin.rewriteheaders.rewrites[0].replacement: '{{ adguard_path }}/$$1'
 {% endif %}
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: 1
+        max-size: '10m'
+    networks:
+      dns:
+        ipv4_address: "{{ (networks['dns']|split('.'))[:3]|join('.') }}.254"
+{% if docker_network_public.exists %}
+      public: {}
+{% endif %}
+    ports:
+{% if 'tcp' in adguard_protocols %}
+      - '{{ adguard_port }}:53/tcp'
+{% endif %}
+{% if 'udp' in adguard_protocols %}
+      - '{{ adguard_port }}:53/udp'
+{% endif %}
+      - '3000:3000/tcp'
+{% if not docker_network_public.exists %}
+      - '80:80/tcp'
+      - '443:443/tcp'
+{% endif %}
+    restart: 'unless-stopped'
+    security_opt:
+      - 'no-new-privileges'
+    volumes:
+      - "{{ path_data }}/adguard/conf:/opt/adguardhome/conf:rw"
+      - "{{ path_data }}/adguard/work:/opt/adguardhome/work:rw"
 ...
