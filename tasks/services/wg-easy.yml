@@ -9,6 +9,11 @@
     msg: "The WG-Easy admin password (wg_easy_admin_pass) is required."
   when: 'wg_easy_admin_pass|trim|length == 0'
 
+- name: "Check that the 'dns' newtork exists"
+  community.docker.docker_network_info:
+    name: 'dns'
+  register: 'docker_network_dns'
+
 - name: "Check that the 'public' newtork exists"
   community.docker.docker_network_info:
     name: 'public'

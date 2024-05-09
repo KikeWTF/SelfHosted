@@ -70,14 +70,4 @@ http:
           X-Frame-Options: 'SAMEORIGIN'   # Prevents clickjacking attacks
           X-Robots-Tag: |                 # Prevents search engines from indexing the site
             noindex, nofollow, nosnippet, noarchive, notranslate, noimageindex, nositelinkssearchbox
-
-    # --- | Private IP only allow list
-    internal:
-      ipAllowList:
-        sourceRange:
-          - '10.0.0.0/8'
-          - '127.0.0.1/32'
-          - '172.16.0.0/12'
-          - '192.168.0.0/16'
-          - 'fc00::/7'
 ...

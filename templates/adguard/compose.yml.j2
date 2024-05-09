@@ -1,0 +1,65 @@
+---
+networks:
+  dns:
+    driver: 'bridge'
+    ipam:
+      config:
+        - subnet: "{{ networks['dns'] }}"
+    name: 'dns'
+{% if docker_network_public.exists %}
+  public:
+    external: true
+{% endif %}
+
+services:
+  adguard:
+    container_name: 'adguard'
+    healthcheck:
+      interval: '1m'
+      retries: 3
+      test: "/bin/sh -c '/usr/bin/wget --spider http://127.0.0.1 || exit 1'"
+      timeout: '5s'
+    hostname: 'adguard'
+    image: 'adguard/adguardhome:latest'
+    networks:
+      dns:
+        ipv4_address: "{{ (networks['dns']|split('.'))[:3]|join('.') }}.254"
+{% if docker_network_public.exists %}
+      public: {}
+{% endif %}
+    ports:
+{% if 'tcp' in adguard_protocols %}
+      - '{{ adguard_port }}:53/tcp'
+{% endif %}
+{% if 'udp' in adguard_protocols %}
+      - '{{ adguard_port }}:53/udp'
+{% endif %}
+      - '3000:3000/tcp'
+{% if not docker_network_public.exists %}
+      - '80:80/tcp'
+      - '443:443/tcp'
+{% endif %}
+    restart: 'unless-stopped'
+    volumes:
+      - "{{ path_data }}/adguard/conf:/opt/adguardhome/conf:rw"
+      - "{{ path_data }}/adguard/work:/opt/adguardhome/work:rw"
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.group: 'Management'
+      homepage.name: 'AdGuard'
+      homepage.description: 'DNS and AD-Blocking'
+      homepage.icon: '/icons/adguard.png'
+{% if docker_network_public.exists %}
+      homepage.href: "https://{{ adguard_domain }}{{ adguard_path }}/"
+      traefik.enable: true
+      traefik.http.routers.adguard.rule: "Host(`{{ adguard_domain }}`) && PathPrefix(`{{ adguard_path }}/`)"
+      traefik.http.routers.adguard.entrypoints: 'https'
+      traefik.http.routers.adguard.service: 'adguard'
+      traefik.http.routers.adguard.middlewares: 'adguard-subpath@docker, adguard-redirect@docker'
+      traefik.http.services.adguard.loadbalancer.server.port: 80
+      traefik.http.middlewares.adguard-subpath.stripprefix.prefixes: "{{ adguard_path }}"
+      traefik.http.middlewares.adguard-redirect.plugin.rewriteheaders.rewrites[0].header: 'Location'
+      traefik.http.middlewares.adguard-redirect.plugin.rewriteheaders.rewrites[0].regex: '^/(.*)$'
+      traefik.http.middlewares.adguard-redirect.plugin.rewriteheaders.rewrites[0].replacement: '{{ adguard_path }}/$$1'
+{% endif %}
+...

@@ -6,10 +6,6 @@ services:
     image: 'containrrr/watchtower:latest'
     security_opt:
       - 'no-new-privileges'
-    dns:
-      - "{{ ansible_default_ipv4['address'] }}"
-      - '1.1.1.1'
-      - '8.8.8.8'
     cap_drop:
       - 'ALL'
     restart: 'unless-stopped'

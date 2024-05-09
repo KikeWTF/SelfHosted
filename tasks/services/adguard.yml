@@ -1,0 +1,11 @@
+---
+- name: "Check if the 'public' network exists"
+  community.docker.docker_network_info:
+    name: 'public'
+  register: 'docker_network_public'
+
+- name: 'Check that domain is defined if using a public network'
+  ansible.builtin.fail:
+    msg: "The domain (adguard_domain) is required when using the public network."
+  when: 'docker_network_public.exists and adguard_domain|trim|length == 0'
+...

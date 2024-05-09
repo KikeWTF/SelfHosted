@@ -6,10 +6,6 @@ services:
     image: 'linuxserver/duckdns:latest'
     security_opt:
       - 'no-new-privileges'
-    dns:
-      - "{{ ansible_default_ipv4['address'] }}"
-      - '1.1.1.1'
-      - '8.8.8.8'
     restart: 'unless-stopped'
     network_mode: 'host'
     logging:

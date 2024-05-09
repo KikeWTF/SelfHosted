@@ -16,10 +16,6 @@ services:
       - 'public'
     security_opt:
       - 'no-new-privileges'
-    dns:
-      - "{{ ansible_default_ipv4['address'] }}"
-      - '1.1.1.1'
-      - '8.8.8.8'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -34,7 +30,6 @@ services:
     ports:
       - '22:22/tcp'
       - '443:443/tcp'
-      - '51820:51820/udp'
 {% if traefik_dashboard|bool %}
       - '8080:8080/tcp'
 {% endif %}

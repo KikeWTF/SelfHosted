@@ -1,0 +1,13 @@
+---
+# ================================
+#    VaultWarden Configuration
+# ================================
+# VaultWarden is a self-hosted Bitwarden compatible server.
+# Website: https://github.com/dani-garcia/vaultwarden/
+
+# The domain name for the VaultWarden service.
+vaultwarden_domain: ''
+
+# The path to the VaultWarden service.
+vaultwarden_path: ''
+...

@@ -26,6 +26,8 @@ homepage_title: 'Homepage!'
 # The Homepage domain (required when using the public network).
 homepage_domain: ''
 
+# --- | If no proxy is running
+
 # The Homepage port.
 homepage_port: 3000
 ...

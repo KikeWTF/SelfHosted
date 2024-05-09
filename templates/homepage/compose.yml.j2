@@ -18,10 +18,6 @@ services:
 {% endif %}
     security_opt:
       - 'no-new-privileges'
-    dns:
-      - "{{ ansible_default_ipv4['address'] }}"
-      - '1.1.1.1'
-      - '8.8.8.8'
     restart: 'unless-stopped'
     logging:
       driver: 'json-file'
@@ -44,7 +40,6 @@ services:
       traefik.http.routers.homepage.rule: "Host(`{{ homepage_domain }}`)"
       traefik.http.routers.homepage.entrypoints: 'https'
       traefik.http.routers.homepage.service: 'homepage'
-      traefik.http.routers.homepage.middlewares: 'internal@file'
       traefik.http.services.homepage.loadbalancer.server.port: 3000
 {% endif %}
 ...

@@ -1,0 +1,21 @@
+---
+# ================================
+#       AdGuard Configuration
+# ================================
+# AdGuard is a DNS and AD-Blocking service. It can be used to block ads, trackers, and malware domains.
+# Website: https://adguard.com/
+
+# The AdGuard port.
+adguard_port: 53
+
+# The AdGuard protocols.
+adguard_protocols:
+  - 'tcp'
+  - 'udp'
+
+# The AdGuard domain (public network required).
+wg_easy_domain: ''
+
+# The AdGuard path (public network required, avoid the trailing slash).
+wg_easy_path: '/adguard'
+...
