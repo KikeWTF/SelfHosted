@@ -1,0 +1,16 @@
+---
+# ================================
+#       Dozzle Configuration
+# ================================
+# Dozzle is a Docker log viewer.
+# Website: https://dozzle.dev/
+
+# Disable Dozzle actions.
+dozzle_readonly: false
+
+# The Dozzle path (public network required, avoid the trailing slash).
+dozzle_path: '/dozzle'
+
+# The Dozzle port (if public network does not exists).
+dozzle_port: 8080
+...

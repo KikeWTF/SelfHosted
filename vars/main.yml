@@ -1,14 +1,15 @@
 ---
 available_services:
-  - 'adguard'     # DNS and AD-Blocking
-  - 'duckdns'     # Dynamic DNS
-  - 'errorpages'  # Custom error pages
-  - 'homepage'    # Homepage
-  - 'postgres'    # PSQL database
-  - 'traefik'     # Reverse proxy
-  - 'vaultwarden' # Bitwarden compatible server
-  - 'watchtower'  # Automatic container updates
-  - 'wg-easy'     # WireGuard VPN server and dashboard
+  - 'adguard'       # DNS and AD-Blocking
+  - 'dozzle'        # Docker logs
+  - 'duckdns'       # Dynamic DNS
+  - 'errorpages'    # Custom error pages
+  - 'homepage'      # Homepage
+  - 'postgres'      # PSQL database
+  - 'traefik'       # Reverse proxy
+  - 'vaultwarden'   # Bitwarden compatible server
+  - 'watchtower'    # Automatic container updates
+  - 'wg-easy'       # WireGuard VPN server and dashboard
 
 networks:
   dns: '172.16.10.0/24'

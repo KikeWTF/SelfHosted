@@ -1,0 +1,6 @@
+---
+- name: "Check that the 'public' newtork exists"
+  community.docker.docker_network_info:
+    name: 'public'
+  register: 'docker_network_public'
+...

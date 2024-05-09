@@ -1,0 +1,46 @@
+---
+{% if docker_network_public.exists %}
+networks:
+  public:
+    external: true
+
+{% endif %}
+services:
+  dozzle:
+    container_name: 'dozzle'
+    environment:
+{% if docker_network_public.exists %}
+      DOZZLE_BASE: "{{ dozzle_path }}"
+{% endif %}
+      DOZZLE_ENABLE_ACTIONS: "{{ not dozzle_readonly }}"
+      DOZZLE_HOSTNAME: 'dozzle'
+      DOZZLE_NO_ANALYTICS: true
+    healthcheck:
+      interval: '1m'
+      retries: 3
+      test: [ 'CMD', '/dozzle', 'healthcheck' ]
+      timeout: '5s'
+    hostname: 'dozzle'
+    image: 'amir20/dozzle:latest'
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+      homepage.group: 'Management'
+      homepage.name: 'Dozzle'
+      homepage.description: 'Docker logs'
+      homepage.icon: '/icons/dozzle.png'
+{% if docker_network_public.exists %}
+      homepage.href: "http://{{ dozzle_domain }}{{ dozzle_path }}/"
+      traefik.enable: true
+      traefik.http.routers.dozzle.rule: "Host(`{{ dozzle_domain }}`) && PathPrefix(`{{ dozzle_path }}/`)"
+      traefik.http.routers.dozzle.entrypoints: 'https'
+      traefik.http.routers.dozzle.service: 'dozzle'
+      traefik.http.services.dozzle.loadbalancer.server.port: 8080
+    networks:
+      - 'public'
+{% else %}
+    ports:
+      - "{{ dozzle_port }}:8080/tcp"
+{% endif %}
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+...
