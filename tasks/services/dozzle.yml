@@ -4,8 +4,8 @@
     name: 'public'
   register: 'docker_network_public'
 
-- name: 'Check that the Dozzler domain is defined'
+- name: 'Check that the Dozzle domain is defined'
   ansible.builtin.fail:
-    msg: "The Dozzler domain (dozzler_domain) is required when using the public network."
-  when: 'docker_network_public.exists and dozzler_domain|trim|length == 0'
+    msg: "The Dozzle domain (dozzle_domain) is required when using the public network."
+  when: 'docker_network_public.exists and dozzle_domain|trim|length == 0'
 ...
